@@ -15,12 +15,11 @@
       justify-content: center;
       height: 100vh;
       margin: 0;
-      text-align: center;
     }
     h1 {
       margin-bottom: 20px;
     }
-    button {
+    button, .link-button {
       background-color: gold;
       color: black;
       border: none;
@@ -28,8 +27,10 @@
       margin: 5px;
       cursor: pointer;
       font-size: 16px;
+      text-decoration: none;
+      display: inline-block;
     }
-    button:hover {
+    button:hover, .link-button:hover {
       background-color: darkorange;
     }
     input[type="number"] {
@@ -37,34 +38,24 @@
       margin: 5px;
       font-size: 16px;
     }
-    #result, #searchResult {
+    #result, #searchResult, #searchSteps {
       margin-top: 20px;
       width: 80%;
       text-align: center;
       word-wrap: break-word;
-    }
-    a {
-      background-color: gold;
-      color: black;
-      text-decoration: none;
-      padding: 10px 20px;
-      margin: 20px 5px 0 5px;
-      display: inline-block;
-      font-size: 16px;
-    }
-    a:hover {
-      background-color: darkorange;
     }
   </style>
 </head>
 <body>
   <h1>Array met 100 Willekeurige Nummers onder de 100</h1>
   <button id="generateButton">Genereer Nummers</button>
-  <input type="number" id="searchNumber" placeholder="Nummer om te zoeken">
+  <button id="sortButton">Sorteer Nummers</button>
+  <input type="number" id="searchNumber" placeholder="Zoek een nummer">
   <button id="searchButton">Zoek Nummer</button>
   <div id="result"></div>
   <div id="searchResult"></div>
-  <a href="index.html">Terug naar de main page</a>
+  <div id="searchSteps"></div>
+  <a href="index.html" class="link-button">Main Page</a>
 
   <script>
     // Functie om een willekeurig getal onder de 100 te genereren
@@ -81,31 +72,67 @@
       return randomNumbers;
     }
 
-    // Functie om lineair te zoeken naar een nummer in de array
-    function linearSearch(array, number) {
-      let indices = [];
-      for (let i = 0; i < array.length; i++) {
-        if (array[i] === number) {
-          indices.push(i);
-        }
-      }
-      return indices;
-    }
-
     // Functie om de array in de HTML weer te geven
     function displayRandomNumbers(numbers) {
       let resultDiv = document.getElementById('result');
       resultDiv.textContent = numbers.join(', ');
     }
 
-    // Functie om de zoekresultaten in de HTML weer te geven
-    function displaySearchResult(indices, number) {
-      let searchResultDiv = document.getElementById('searchResult');
-      if (indices.length > 0) {
-        searchResultDiv.textContent = `Het nummer ${number} is gevonden op de volgende plekken: ${indices.join(', ')}`;
-      } else {
-        searchResultDiv.textContent = `Het nummer ${number} is niet gevonden in de array.`;
+    // Bubble sort-functie
+    function bubbleSort(array) {
+      let len = array.length;
+      for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len - 1 - i; j++) {
+          if (array[j] > array[j + 1]) {
+            let temp = array[j];
+            array[j] = array[j + 1];
+            array[j + 1] = temp;
+          }
+        }
       }
+      return array;
+    }
+
+    // Uitgebreide binaire zoekfunctie met stap logging
+    function binarySearchAll(array, target) {
+      let left = 0;
+      let right = array.length - 1;
+      let foundIndex = -1;
+      let steps = [];
+
+      // Basis binaire zoekopdracht om een van de instanties te vinden
+      while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        steps.push(`left: ${left}, right: ${right}, mid: ${mid}`);
+        if (array[mid] === target) {
+          foundIndex = mid;
+          break;
+        } else if (array[mid] < target) {
+          left = mid + 1;
+        } else {
+          right = mid - 1;
+        }
+      }
+
+      if (foundIndex === -1) return { indices: [], steps }; // Nummer niet gevonden
+
+      // Zoek naar links voor meer instanties
+      let indices = [foundIndex];
+      let leftIndex = foundIndex - 1;
+      while (leftIndex >= 0 && array[leftIndex] === target) {
+        indices.push(leftIndex);
+        leftIndex--;
+      }
+
+      // Zoek naar rechts voor meer instanties
+      let rightIndex = foundIndex + 1;
+      while (rightIndex < array.length && array[rightIndex] === target) {
+        indices.push(rightIndex);
+        rightIndex++;
+      }
+
+      // Sorteer de indices
+      return { indices: indices.sort((a, b) => a - b), steps };
     }
 
     // Event listener voor de knop om nummers te genereren
@@ -115,17 +142,40 @@
       displayRandomNumbers(numbers);
     });
 
+    // Event listener voor de knop om nummers te sorteren
+    document.getElementById('sortButton').addEventListener('click', () => {
+      if (window.randomNumbers) {
+        let sortedNumbers = bubbleSort(window.randomNumbers);
+        window.randomNumbers = sortedNumbers; // Werk de global scope bij met de gesorteerde nummers
+        displayRandomNumbers(sortedNumbers);
+      } else {
+        alert('Genereer eerst nummers om te sorteren.');
+      }
+    });
+
     // Event listener voor de knop om een nummer te zoeken
     document.getElementById('searchButton').addEventListener('click', () => {
-      let searchNumber = parseInt(document.getElementById('searchNumber').value);
-      if (!isNaN(searchNumber)) {
-        let indices = linearSearch(window.randomNumbers, searchNumber);
-        displaySearchResult(indices, searchNumber);
+      let target = parseInt(document.getElementById('searchNumber').value);
+      if (isNaN(target)) {
+        alert('Voer een geldig nummer in om te zoeken.');
+        return;
+      }
+
+      if (window.randomNumbers) {
+        let { indices, steps } = binarySearchAll(window.randomNumbers, target);
+        let searchResultDiv = document.getElementById('searchResult');
+        let searchStepsDiv = document.getElementById('searchSteps');
+        if (indices.length > 0) {
+          searchResultDiv.textContent = `Nummer ${target} gevonden op posities: ${indices.join(', ')}. Aantal: ${indices.length}`;
+          searchStepsDiv.textContent = `Stappen van binaire zoekopdracht: ${steps.join(' | ')}`;
+        } else {
+          searchResultDiv.textContent = `Nummer ${target} niet gevonden.`;
+          searchStepsDiv.textContent = '';
+        }
       } else {
-        alert('Voer een geldig nummer in.');
+        alert('Genereer en sorteer eerst de nummers voordat je zoekt.');
       }
     });
   </script>
 </body>
 </html>
-
