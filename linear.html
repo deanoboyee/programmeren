@@ -4,6 +4,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Random Numbers</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: gold;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: darkorange;
+    }
+    input[type="number"] {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    #result, #searchResult {
+      margin-top: 20px;
+      width: 80%;
+      text-align: center;
+      word-wrap: break-word;
+    }
+    a {
+      color: gold;
+      text-decoration: none;
+      margin-top: 20px;
+      display: inline-block;
+    }
+    a:hover {
+      color: darkorange;
+    }
+  </style>
 </head>
 <body>
   <h1>Array met 100 Willekeurige Nummers onder de 100</h1>
@@ -12,6 +61,7 @@
   <button id="searchButton">Zoek Nummer</button>
   <div id="result"></div>
   <div id="searchResult"></div>
+  <a href="index.html">Terug naar de main page</a>
 
   <script>
     // Functie om een willekeurig getal onder de 100 te genereren
@@ -75,4 +125,5 @@
   </script>
 </body>
 </html>
+
 <a href="index.html">main page''s</a>
